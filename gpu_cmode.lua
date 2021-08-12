@@ -94,6 +94,13 @@ function opt_handler(val, optarg, isremote)
     return SPANK.FAILURE
 end
 
+-- Return last value of multivalue
+-- Used to support os.execute on Lua 5.1 through 5.3 (and later, assuming cmd's
+-- return value is the last value returned).
+-- '#' returns index of last value.
+function get_last_value(...)
+	return select(select('#', ...), ...)
+end
 
 --
 -- SPANK functions ------------------------------------------------------------
@@ -129,7 +136,7 @@ function slurm_spank_user_init(spank)
                    cmode, device_ids)
     local cmd = nvs_path .. " -c " .. cmodes_index[cmode] ..
                             " -i " .. device_ids
-    local ret = tonumber(os.execute(cmd))
+    local ret = tonumber(get_last_value(os.execute(cmd)))
     SPANK.log_debug(myname .. ": DEBUG: cmd = %s\n", cmd)
     SPANK.log_debug(myname .. ": DEBUG: ret = %s\n", ret)
 
@@ -159,7 +166,7 @@ function slurm_spank_task_exit(spank)
                    " on GPU(s): %s\n", default_cmode, device_ids)
     local cmd = nvs_path .. " -c " .. cmodes_index[default_cmode] ..
                             " -i " .. device_ids
-    local ret = tonumber(os.execute(cmd))
+    local ret = tonumber(get_last_value(os.execute(cmd)))
     SPANK.log_debug(myname .. ": DEBUG: cmd = %s\n", cmd)
     SPANK.log_debug(myname .. ": DEBUG: ret = %s\n", ret)
 
